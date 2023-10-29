@@ -1,4 +1,4 @@
-package com.MitoDev.FrostVault.config;
+package com.MitoDev.FrostVault.config.security;
 
 import io.jsonwebtoken.*;
 import jakarta.servlet.FilterChain;

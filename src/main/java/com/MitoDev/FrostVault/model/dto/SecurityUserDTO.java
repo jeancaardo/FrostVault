@@ -5,9 +5,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class ExceptionDTO {
+@NoArgsConstructor
+public class SecurityUserDTO {
+    private String username;
 
-    private String message;
+    private String token;
 }
