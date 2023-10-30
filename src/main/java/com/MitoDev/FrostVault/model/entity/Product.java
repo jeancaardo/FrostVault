@@ -1,5 +1,6 @@
 package com.MitoDev.FrostVault.model.entity;
 
+import com.MitoDev.FrostVault.model.entity.enums.Type;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -32,8 +33,5 @@ public class Product {
 
     @Enumerated(EnumType.ORDINAL)
     private Type productType;
-
-    @OneToMany(fetch = FetchType.EAGER)
-    private List<Batch> batchList;
 
 }

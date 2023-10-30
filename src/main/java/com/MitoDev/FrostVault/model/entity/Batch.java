@@ -2,6 +2,7 @@ package com.MitoDev.FrostVault.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -30,6 +31,5 @@ public class Batch {
     private Product product;
 
     @ManyToOne
-    @JoinColumn(name="id_section")
     private Section section;
 }

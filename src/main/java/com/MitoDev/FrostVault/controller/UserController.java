@@ -4,6 +4,8 @@ import com.MitoDev.FrostVault.model.dto.SecurityUserDTO;
 import com.MitoDev.FrostVault.exception.custom.CredentialsNotFoundException;
 import com.MitoDev.FrostVault.model.entity.User;
 import com.MitoDev.FrostVault.repository.IUserRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.security.core.GrantedAuthority;
@@ -20,6 +22,8 @@ import java.util.stream.Collectors;
 @RestController
 public class UserController {
 
+    private ObjectMapper objectMapper = new ObjectMapper();
+
     private IUserRepository userRepository;
 
     public UserController(IUserRepository userRepository) {
@@ -27,7 +31,7 @@ public class UserController {
     }
 
     @PostMapping("user")
-    public SecurityUserDTO login(@RequestParam("user") String username, @RequestParam("password") String pwd) {
+    public SecurityUserDTO login(@RequestParam("user") String username, @RequestParam("password") String pwd) throws JsonProcessingException {
 
         User user = userRepository.findByUsernameEqualsAndPassword(username, pwd)
                 .orElseThrow(() -> {throw new CredentialsNotFoundException("Wrong credentials for user '"+username+"'. Try again. ");});
@@ -44,7 +48,8 @@ public class UserController {
     public String hola(){
         return "hola";
     }
-    private String getJWTToken(User user) {
+
+    private String getJWTToken(User user) throws JsonProcessingException {
         String secretKey = "mySecretKey";
         List<GrantedAuthority> grantedAuthorities = AuthorityUtils
                 .commaSeparatedStringToAuthorityList("ROLE_"+user.getRole().toString());
@@ -52,7 +57,7 @@ public class UserController {
         String token = Jwts
                 .builder()
                 .setId("softtekJWT")
-                .setSubject(user.getUsername())
+                .setSubject(objectMapper.writeValueAsString(user))
                 .claim("authorities",
                         grantedAuthorities.stream()
                                 .map(GrantedAuthority::getAuthority)

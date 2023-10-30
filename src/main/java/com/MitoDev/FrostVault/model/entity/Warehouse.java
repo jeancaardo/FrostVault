@@ -10,7 +10,6 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "warehouses")
 @ToString
 @EqualsAndHashCode
 @Builder
@@ -21,7 +20,4 @@ public class Warehouse {
     private Integer id;
 
     private String address;
-
-    @OneToMany(mappedBy = "warehouse",cascade=CascadeType.ALL)
-    private List<Section> sectionList;
 }

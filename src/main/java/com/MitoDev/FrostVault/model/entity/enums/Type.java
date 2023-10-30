@@ -1,4 +1,4 @@
-package com.MitoDev.FrostVault.model.entity;
+package com.MitoDev.FrostVault.model.entity.enums;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
