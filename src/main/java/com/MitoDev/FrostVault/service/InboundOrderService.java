@@ -46,7 +46,7 @@ public class InboundOrderService implements IInboundOrderService {
         InboundOrder order = fromDtoToEntity(req, section);
 
         // TODO : CHECK IF WE CAN UPDATE BATCHES OR THEY STAY THE SAME.
-        List<Batch> newBatchesPersisted = order.getBatches().stream().map(batchRepository::save).collect(Collectors.toList());
+        List<Batch> newBatchesPersisted = batchRepository.saveAll(order.getBatches());
         order.setBatches(newBatchesPersisted);
         // persisting entity
         order = inboundOrderRepository.save(order);
@@ -67,14 +67,14 @@ public class InboundOrderService implements IInboundOrderService {
 
         // Use of design pattern builder for better understanding
         InboundOrder newOrder = fromDtoToEntity(req, section);
-        ArrayList<Batch> newOrderBatches = new ArrayList<>(newOrder.getBatches());
-        for (var batch : existentOrder.getBatches()) {
-            if(newOrder.getBatches().stream().noneMatch(b -> b.getBatchNumber() == null || b.getBatchNumber().equals(batch.getBatchNumber())))
+        ArrayList<Batch> newOrderBatches = new ArrayList<>(existentOrder.getBatches());
+        for (var batch : newOrder.getBatches()) {
+            if(existentOrder.getBatches().stream().noneMatch(b -> b.getBatchNumber() == null || b.getBatchNumber().equals(batch.getBatchNumber())))
                 newOrderBatches.add(batch);
         }
 
         newOrder.setBatches(newOrderBatches);
-        List<Batch> batchesPersisted = newOrder.getBatches().stream().map(batchRepository::save).collect(Collectors.toList());
+        List<Batch> batchesPersisted = batchRepository.saveAll(newOrder.getBatches());
         newOrder.setBatches(batchesPersisted);
 
         // TODO : CHECK IF WE CAN UPDATE BATCHES OR THEY STAY THE SAME.
@@ -96,7 +96,8 @@ public class InboundOrderService implements IInboundOrderService {
         );
 
         // Check if the section exists
-        Section section = sectionRepository.findById(inboundOrder.getSection().getSectionCode()).orElseThrow(() ->{throw new EntityDoesNotExistException(Section.class, inboundOrder.getSection().getSectionCode());});
+        Section section = sectionRepository.findById(inboundOrder.getSection().getSectionCode()).orElseThrow(
+                () ->{throw new EntityDoesNotExistException(Section.class, inboundOrder.getSection().getSectionCode());});
 
         inboundOrder.getBatchStock().forEach((bs)->{
             // Check if each section matches with the product associated
@@ -126,11 +127,11 @@ public class InboundOrderService implements IInboundOrderService {
                 .orderDate(dto.getOrderDate())
                 .section(section)
                 .batches(
-                        dto.getBatchStock().stream().map(this::fromDtoToEntity).toList()
+                        dto.getBatchStock().stream().map(b -> fromDtoToEntity(b, section)).toList()
                 ).build();
     }
 
-    private Batch fromDtoToEntity(BatchDTO dto){
+    private Batch fromDtoToEntity(BatchDTO dto, Section section){
         // Use of design pattern builder for better understanding
             return Batch.builder()
                     .batchNumber(dto.getBatchNumber())
@@ -139,7 +140,8 @@ public class InboundOrderService implements IInboundOrderService {
                     .manufacturingDate(dto.getManufacturingDate())
                     .initialQuantity(dto.getInitialQuantity())
                     .manufacturingTime(dto.getManufacturingTime())
-                    .product(Product.builder().idProduct(dto.getProductId()).build())
+                    .product(productRepository.findById(dto.getProductId()).get())
+                    .section(section)
                     .build();
     }
 

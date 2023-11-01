@@ -2,7 +2,7 @@ package com.MitoDev.FrostVault.exception.custom;
 
 public class UserNotBelongsToWarehouseException extends RuntimeException {
 
-    private static final String msg = "Warehouse with id %o does not exists";
+    private static final String msg = "User does not belong to warehouse with id %o";
 
     public UserNotBelongsToWarehouseException() {
     }
