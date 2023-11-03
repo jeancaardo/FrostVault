@@ -25,8 +25,6 @@ public class Product {
 
     private String name;
 
-    private Integer totalQuantity;
-
     private Integer price;
 
     private Double temperature;

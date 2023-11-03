@@ -4,8 +4,7 @@ package com.MitoDev.FrostVault.model.entity;
 import lombok.*;
 
 import jakarta.persistence.*;
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
@@ -22,11 +21,6 @@ public class PurchaseOrderDetail {
     @ManyToOne
     @JoinColumn(name="id_product")
     private Product product;
-
-    //Bidireccional
-//    @ManyToOne()
-//    @JoinColumn(name = "id_order", nullable = false)
-//    private PurchaseOrder purchaseOrder;
 
 
 }

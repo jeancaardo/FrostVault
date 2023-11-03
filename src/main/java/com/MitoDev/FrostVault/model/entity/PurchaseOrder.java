@@ -1,13 +1,13 @@
 package com.MitoDev.FrostVault.model.entity;
 
+import com.MitoDev.FrostVault.model.entity.enums.PurchaseOrderStatus;
 import lombok.*;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
 
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -21,7 +21,7 @@ public class PurchaseOrder {
 
     private LocalDate date;
 
-    private String statusCode;
+    private PurchaseOrderStatus statusCode;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "order_id")

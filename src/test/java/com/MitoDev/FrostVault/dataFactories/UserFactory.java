@@ -11,6 +11,7 @@ public class UserFactory {
                 .password("1234")
                 .role(Role.WAREHOUSE_ADMIN)
                 .username("pepito")
+                .cardNumber("1234 5678")
                 .warehouse(WarehouseFactory.warehouse1())
                 .build();
     }

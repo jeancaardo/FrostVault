@@ -1,5 +1,6 @@
 package com.MitoDev.FrostVault.exception;
 
+import com.MitoDev.FrostVault.exception.custom.CustomException;
 import com.MitoDev.FrostVault.model.dto.ExceptionDTO;
 import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
@@ -12,9 +13,9 @@ import java.util.stream.Collectors;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ExceptionDTO> exceptionHandler(RuntimeException ex){
-        return ResponseEntity.badRequest().body(new ExceptionDTO(ex.getMessage()));
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<ExceptionDTO> exceptionHandler(CustomException ex){
+        return ResponseEntity.status(ex.getCode()).body(new ExceptionDTO(ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

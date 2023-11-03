@@ -14,6 +14,7 @@ import com.MitoDev.FrostVault.repository.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,15 +55,8 @@ public class InboundOrderServiceTest {
     @InjectMocks
     InboundOrderService service;
 
-    @Test
-    @DirtiesContext
-    @DisplayName("Should add a new inbound order and return a list of batches")
-    void addNewInboundOrderTest() throws JsonProcessingException {
-        // arrange
-        InboundOrderRequestDTO dto = InboundOrderFactory.inboundOrderRequestDTO1();
-        var expected = new BatchStockDTO(BatchFactory.listOfBatchesResponseDTO());
-        // act
-
+    @BeforeEach()
+    void setup() throws JsonProcessingException {
         Authentication authentication = Mockito.mock(Authentication.class);
         // Mockito.whens() for your authorization object
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
@@ -70,6 +64,17 @@ public class InboundOrderServiceTest {
         SecurityContextHolder.setContext(securityContext);
 
         when(securityContext.getAuthentication().getPrincipal()).thenReturn(objectMapper.writeValueAsString(UserFactory.user1()));
+    }
+
+    @Test
+    @DirtiesContext
+    @DisplayName("Should add a new inbound order and return a list of batches")
+    void addNewInboundOrderTest() {
+        // arrange
+        InboundOrderRequestDTO dto = InboundOrderFactory.inboundOrderRequestDTO1();
+        var expected = new BatchStockDTO(BatchFactory.listOfBatchesResponseDTO());
+        // act
+
         when(userRepository.findByIdEqualsAndWarehouseIdEquals(UserFactory.user1().getId(), UserFactory.user1().getWarehouse().getId())).thenReturn(Optional.of(UserFactory.user1()));
         when(sectionRepository.findById(dto.getSection().getSectionCode())).thenReturn(Optional.of(SectionFactory.section1()));
         when(productRepository.findById(any())).thenReturn(Optional.of(ProductFactory.product1()));
@@ -92,13 +97,6 @@ public class InboundOrderServiceTest {
         var expected = new BatchStockDTO(BatchFactory.listOfBatchesResponseDTO());
         // act
 
-        Authentication authentication = Mockito.mock(Authentication.class);
-        // Mockito.whens() for your authorization object
-        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        SecurityContextHolder.setContext(securityContext);
-
-        when(securityContext.getAuthentication().getPrincipal()).thenReturn(objectMapper.writeValueAsString(UserFactory.user1()));
         when(userRepository.findByIdEqualsAndWarehouseIdEquals(UserFactory.user1().getId(), UserFactory.user1().getWarehouse().getId())).thenReturn(Optional.empty());
 
         Assertions.assertThrows(UserNotBelongsToWarehouseException.class, ()-> {service.addNewInboundOrder(dto);} );
@@ -111,14 +109,6 @@ public class InboundOrderServiceTest {
         InboundOrderRequestDTO dto = InboundOrderFactory.inboundOrderRequestDTO1();
         var expected = new BatchStockDTO(BatchFactory.listOfBatchesResponseDTO());
         // act
-
-        Authentication authentication = Mockito.mock(Authentication.class);
-        // Mockito.whens() for your authorization object
-        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        SecurityContextHolder.setContext(securityContext);
-
-        when(securityContext.getAuthentication().getPrincipal()).thenReturn(objectMapper.writeValueAsString(UserFactory.user1()));
         when(userRepository.findByIdEqualsAndWarehouseIdEquals(UserFactory.user1().getId(), UserFactory.user1().getWarehouse().getId())).thenReturn(Optional.of(UserFactory.user1()));
         when(sectionRepository.findById(dto.getSection().getSectionCode())).thenReturn(Optional.empty());
 
@@ -132,13 +122,6 @@ public class InboundOrderServiceTest {
         InboundOrderRequestDTO dto = InboundOrderFactory.inboundOrderRequestDTO1();
         // act
 
-        Authentication authentication = Mockito.mock(Authentication.class);
-        // Mockito.whens() for your authorization object
-        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        SecurityContextHolder.setContext(securityContext);
-
-        when(securityContext.getAuthentication().getPrincipal()).thenReturn(objectMapper.writeValueAsString(UserFactory.user1()));
         when(userRepository.findByIdEqualsAndWarehouseIdEquals(UserFactory.user1().getId(), UserFactory.user1().getWarehouse().getId())).thenReturn(Optional.of(UserFactory.user1()));
         when(sectionRepository.findById(dto.getSection().getSectionCode())).thenReturn(Optional.of(SectionFactory.section1()));
         when(productRepository.findById(any())).thenReturn(Optional.empty());
@@ -153,13 +136,6 @@ public class InboundOrderServiceTest {
         InboundOrderRequestDTO dto = InboundOrderFactory.inboundOrderRequestDTO1();
         // act
 
-        Authentication authentication = Mockito.mock(Authentication.class);
-        // Mockito.whens() for your authorization object
-        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        SecurityContextHolder.setContext(securityContext);
-
-        when(securityContext.getAuthentication().getPrincipal()).thenReturn(objectMapper.writeValueAsString(UserFactory.user1()));
         when(userRepository.findByIdEqualsAndWarehouseIdEquals(UserFactory.user1().getId(), UserFactory.user1().getWarehouse().getId())).thenReturn(Optional.of(UserFactory.user1()));
         when(sectionRepository.findById(dto.getSection().getSectionCode())).thenReturn(Optional.of(SectionFactory.section1()));
         when(productRepository.findById(any())).thenReturn(Optional.of(ProductFactory.product2()));
@@ -174,13 +150,6 @@ public class InboundOrderServiceTest {
         InboundOrderRequestDTO dto = InboundOrderFactory.inboundOrderRequestExistentDTOWithTooMuchQuantity();
         // act
 
-        Authentication authentication = Mockito.mock(Authentication.class);
-        // Mockito.whens() for your authorization object
-        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        SecurityContextHolder.setContext(securityContext);
-
-        when(securityContext.getAuthentication().getPrincipal()).thenReturn(objectMapper.writeValueAsString(UserFactory.user1()));
         when(userRepository.findByIdEqualsAndWarehouseIdEquals(UserFactory.user1().getId(), UserFactory.user1().getWarehouse().getId())).thenReturn(Optional.of(UserFactory.user1()));
         when(sectionRepository.findById(dto.getSection().getSectionCode())).thenReturn(Optional.of(SectionFactory.section1()));
         when(productRepository.findById(any())).thenReturn(Optional.of(ProductFactory.product1()));
@@ -198,13 +167,6 @@ public class InboundOrderServiceTest {
         InboundOrderRequestDTO dto = InboundOrderFactory.inboundOrderRequestExistentDTO1();
         var expected = new BatchStockDTO(BatchFactory.listOfBatchesResponseDTO2());
         // act
-        Authentication authentication = Mockito.mock(Authentication.class);
-        // Mockito.whens() for your authorization object
-        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        SecurityContextHolder.setContext(securityContext);
-
-        when(securityContext.getAuthentication().getPrincipal()).thenReturn(objectMapper.writeValueAsString(UserFactory.user1()));
 
         when(inboundOrderRepository.findById(dto.getOrderNumber())).thenReturn(Optional.of(InboundOrderFactory.inboundOrderPersisted1()));
         when(userRepository.findByIdEqualsAndWarehouseIdEquals(UserFactory.user1().getId(), UserFactory.user1().getWarehouse().getId())).thenReturn(Optional.of(UserFactory.user1()));

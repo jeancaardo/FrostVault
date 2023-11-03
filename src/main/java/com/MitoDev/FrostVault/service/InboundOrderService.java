@@ -7,6 +7,7 @@ import com.MitoDev.FrostVault.model.dto.InboundOrderRequestDTO;
 import com.MitoDev.FrostVault.model.entity.*;
 import com.MitoDev.FrostVault.repository.*;
 import com.MitoDev.FrostVault.service.interfaces.IInboundOrderService;
+import com.MitoDev.FrostVault.util.UserUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -39,7 +40,7 @@ public class InboundOrderService implements IInboundOrderService {
     }
 
     @Override
-    public BatchStockDTO addNewInboundOrder(InboundOrderRequestDTO req) throws JsonProcessingException {
+    public BatchStockDTO addNewInboundOrder(InboundOrderRequestDTO req) {
         Section section = inboundOrderValidations(req);
 
         // convert dto to entity
@@ -56,7 +57,7 @@ public class InboundOrderService implements IInboundOrderService {
     }
 
     @Override
-    public BatchStockDTO updateNewInboundOrder(InboundOrderRequestDTO req) throws JsonProcessingException {
+    public BatchStockDTO updateNewInboundOrder(InboundOrderRequestDTO req) {
         // Assuring inbound order exists
         InboundOrder existentOrder = inboundOrderRepository.findById(req.getOrderNumber())
                 .orElseThrow(
@@ -85,10 +86,10 @@ public class InboundOrderService implements IInboundOrderService {
         ).toList());
     }
 
-    private Section inboundOrderValidations(InboundOrderRequestDTO inboundOrder) throws JsonProcessingException {
+    private Section inboundOrderValidations(InboundOrderRequestDTO inboundOrder) {
 
         // Retrieving context data about user who requested
-        User user = objectMapper.readValue(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(), User.class);
+        User user = UserUtils.getUserFromContext();
 
         /// Check if admin belongs to this warehouse
         userRepository.findByIdEqualsAndWarehouseIdEquals(user.getId(), user.getWarehouse().getId()).orElseThrow(

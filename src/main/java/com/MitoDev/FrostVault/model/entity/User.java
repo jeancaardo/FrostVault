@@ -20,6 +20,8 @@ public class User {
 
     private String password;
 
+    private String cardNumber;
+
     @Column(length = 10)
     private Role role;
 

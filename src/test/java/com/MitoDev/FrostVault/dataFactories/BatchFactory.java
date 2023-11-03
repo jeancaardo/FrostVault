@@ -16,11 +16,24 @@ public class BatchFactory {
         return Batch.builder()
                 .batchNumber(1)
                 .product(ProductFactory.product1())
-                .initialQuantity(25)
+                .initialQuantity(50)
                 .manufacturingTime(LocalDateTime.of(2020, 2, 20, 20, 20))
                 .manufacturingDate(LocalDate.of(2020, 2, 20))
                 .dueDate(LocalDate.of(2024, 2, 20))
-                .currentQuantity(25)
+                .currentQuantity(50)
+                .section(SectionFactory.section1())
+                .build();
+    }
+
+    public static Batch batchPersisted1With0Quantity(){
+        return Batch.builder()
+                .batchNumber(1)
+                .product(ProductFactory.product1())
+                .initialQuantity(50)
+                .manufacturingTime(LocalDateTime.of(2020, 2, 20, 20, 20))
+                .manufacturingDate(LocalDate.of(2020, 2, 20))
+                .dueDate(LocalDate.of(2024, 2, 20))
+                .currentQuantity(0)
                 .section(SectionFactory.section1())
                 .build();
     }
@@ -42,11 +55,11 @@ public class BatchFactory {
     public static Batch batchNew1(){
         return Batch.builder()
                 .product(ProductFactory.product1())
-                .initialQuantity(25)
+                .initialQuantity(50)
                 .manufacturingTime(LocalDateTime.of(2020, 2, 20, 20, 20))
                 .manufacturingDate(LocalDate.of(2020, 2, 20))
                 .dueDate(LocalDate.of(2024, 2, 20))
-                .currentQuantity(25)
+                .currentQuantity(50)
                 .section(SectionFactory.section1())
                 .build();
     }
@@ -86,12 +99,12 @@ public class BatchFactory {
     public static BatchDTO batchRequestDTO1(){
         return BatchDTO.builder()
                 .productId(1)
-                .initialQuantity(25)
+                .initialQuantity(50)
                 .currentTemperature(20D)
                 .manufacturingTime(LocalDateTime.of(2020, 2, 20, 20, 20))
                 .manufacturingDate(LocalDate.of(2020, 2, 20))
                 .dueDate(LocalDate.of(2024, 2, 20))
-                .currentQuantity(25)
+                .currentQuantity(50)
                 .build();
     }
 
@@ -99,12 +112,12 @@ public class BatchFactory {
         return BatchDTO.builder()
                 .batchNumber(1)
                 .productId(1)
-                .initialQuantity(25)
+                .initialQuantity(50)
                 .currentTemperature(20D)
                 .manufacturingTime(LocalDateTime.of(2020, 2, 20, 20, 20))
                 .manufacturingDate(LocalDate.of(2020, 2, 20))
                 .dueDate(LocalDate.of(2024, 2, 20))
-                .currentQuantity(25)
+                .currentQuantity(50)
                 .build();
     }
 
@@ -136,12 +149,12 @@ public class BatchFactory {
         return BatchDTO.builder()
                 .batchNumber(1)
                 .productId(1)
-                .initialQuantity(25)
+                .initialQuantity(50)
                 .currentTemperature(20D)
                 .manufacturingTime(LocalDateTime.of(2020, 2, 20, 20, 20))
                 .manufacturingDate(LocalDate.of(2020, 2, 20))
                 .dueDate(LocalDate.of(2024, 2, 20))
-                .currentQuantity(25)
+                .currentQuantity(50)
                 .build();
     }
 

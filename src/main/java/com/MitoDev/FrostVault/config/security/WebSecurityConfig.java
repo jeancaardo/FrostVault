@@ -47,12 +47,11 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable);
         http.addFilterAfter(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
-        http.authorizeHttpRequests((authz) -> authz
-                .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
-                .requestMatchers("/hola/**").hasRole("USER")
-                .requestMatchers("/auth/user/**").authenticated()
-                .requestMatchers("/auth/admin/**").authenticated()
-                .anyRequest().permitAll()
+        http.authorizeHttpRequests(
+                (authz) -> authz
+                    .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
+                    .requestMatchers("/hola/**").hasRole("USER")
+                    .anyRequest().permitAll()
         );
 
         return http.build();

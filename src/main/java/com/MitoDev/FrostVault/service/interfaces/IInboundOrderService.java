@@ -7,7 +7,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.List;
 
 public interface IInboundOrderService {
-    BatchStockDTO addNewInboundOrder(InboundOrderRequestDTO req) throws JsonProcessingException;
+    BatchStockDTO addNewInboundOrder(InboundOrderRequestDTO req);
 
-    BatchStockDTO updateNewInboundOrder(InboundOrderRequestDTO req) throws JsonProcessingException;
+    BatchStockDTO updateNewInboundOrder(InboundOrderRequestDTO req);
 }
