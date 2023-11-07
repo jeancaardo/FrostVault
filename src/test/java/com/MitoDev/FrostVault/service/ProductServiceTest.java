@@ -5,7 +5,6 @@ import com.MitoDev.FrostVault.exception.custom.NoProductsException;
 import com.MitoDev.FrostVault.model.dto.ProductListResponseDTO;
 import com.MitoDev.FrostVault.model.entity.enums.Type;
 import com.MitoDev.FrostVault.repository.IProductRepository;
-import com.MitoDev.FrostVault.service.interfaces.IProductService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,7 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,7 +44,7 @@ class ProductServiceTest {
     void getAllProductsByCategory() {
         // arrange
         String category = "FF";
-        var expected = new ProductListResponseDTO(List.of(ProductFactory.productReponseDTO()));
+        var expected = new ProductListResponseDTO(List.of(ProductFactory.productReponseDTO1()));
         // act
         when(productRepository.findAllByProductTypeEquals(Type.FROZEN)).thenReturn(List.of(ProductFactory.product1()));
 
@@ -73,7 +71,7 @@ class ProductServiceTest {
     void getAllProductsByCategoryNoProducts() {
         // arrange
         String category = "FF";
-        var expected = new ProductListResponseDTO(List.of(ProductFactory.productReponseDTO()));
+        var expected = new ProductListResponseDTO(List.of(ProductFactory.productReponseDTO1()));
         // act
         when(productRepository.findAllByProductTypeEquals(Type.FROZEN)).thenReturn(List.of());
         Assertions.assertThrows(NoProductsException.class, () -> productService.getAllProductsByCategory(category));

@@ -4,9 +4,7 @@ import com.MitoDev.FrostVault.dataFactories.*;
 import com.MitoDev.FrostVault.exception.custom.*;
 import com.MitoDev.FrostVault.model.dto.ProductDTO;
 import com.MitoDev.FrostVault.model.dto.PurchaseOrderRequestDTO;
-import com.MitoDev.FrostVault.model.entity.Product;
-import com.MitoDev.FrostVault.model.entity.PurchaseOrder;
-import com.MitoDev.FrostVault.model.entity.User;
+import com.MitoDev.FrostVault.model.entity.*;
 import com.MitoDev.FrostVault.model.entity.enums.PurchaseOrderStatus;
 import com.MitoDev.FrostVault.repository.IBatchRepository;
 import com.MitoDev.FrostVault.repository.IProductRepository;
@@ -52,6 +50,29 @@ public class PurchaseOrderServiceTest {
     @InjectMocks
     private PurchaseOrderService purchaseOrderService;
 
+    private final User user = UserFactory.user1();
+    private final Product product1 = ProductFactory.product1();
+
+    private final Section section1 = SectionFactory.section1();
+
+    private final Batch newBatch1 = BatchFactory.createBatch(null, product1);
+
+    private final Batch newBatch2 = BatchFactory.createBatch(null, product1);
+
+    private final Batch persistedBatchWith0CurrentCapacity = BatchFactory.createBatchWithCustomQuantity(1, product1, 50, section1, 0);
+    private final Batch persistedBatchWithNotEnoughCapacity = BatchFactory.createBatchWithCustomQuantity(1, product1, 50, section1, 1);
+
+    private final Batch persistedBatch1 = BatchFactory.createBatch(1, product1);
+
+    private final Batch persistedBatch2 = BatchFactory.createBatch(2, product1);
+
+    private final PurchaseOrderDetail newDetail1 = PurchaseOrderDetailsFactory.createOrderDetail(null, product1);
+
+    private final PurchaseOrderDetail newDetail2 = PurchaseOrderDetailsFactory.createOrderDetail(null, product1);
+
+    private final PurchaseOrderDetail persistedDetail1 = PurchaseOrderDetailsFactory.createOrderDetail(1, product1);
+
+    private final PurchaseOrderDetail persistedDetail2 = PurchaseOrderDetailsFactory.createOrderDetail(2, product1);
 
     @BeforeEach()
     void setup() throws JsonProcessingException {
@@ -73,7 +94,7 @@ public class PurchaseOrderServiceTest {
         // act
         when(userRepository.findById(UserFactory.user1().getId())).thenReturn(Optional.of(UserFactory.user1()));
         when(purchaseOrderRepository.findByUserIdAndStatusCodeEquals(UserFactory.user1().getId(), PurchaseOrderStatus.CART)).thenReturn(Optional.empty());
-        when(purchaseOrderRepository.save(PurchaseOrderFactory.getNewPurchaseOrder())).thenReturn(PurchaseOrderFactory.getPurchaseOrderCreated());
+        when(purchaseOrderRepository.save(PurchaseOrderFactory.createPurchaseOrder(null, user, PurchaseOrderStatus.CART))).thenReturn(PurchaseOrderFactory.createPurchaseOrder(1, user, PurchaseOrderStatus.CART));
         var obtained = purchaseOrderService.initializePurchaseOrder();
 
         // assert
@@ -89,7 +110,7 @@ public class PurchaseOrderServiceTest {
 
         // act
         when(userRepository.findById(UserFactory.user1().getId())).thenReturn(Optional.of(UserFactory.user1()));
-        when(purchaseOrderRepository.findByUserIdAndStatusCodeEquals(UserFactory.user1().getId(), PurchaseOrderStatus.CART)).thenReturn(Optional.of(PurchaseOrderFactory.getPurchaseOrderCreated()));
+        when(purchaseOrderRepository.findByUserIdAndStatusCodeEquals(UserFactory.user1().getId(), PurchaseOrderStatus.CART)).thenReturn(Optional.of(PurchaseOrderFactory.createPurchaseOrder(1, user, PurchaseOrderStatus.CART)));
         Assertions.assertThrows(PurchaseOrderAlreadyInProcess.class, () -> purchaseOrderService.initializePurchaseOrder());
 
 
@@ -105,10 +126,13 @@ public class PurchaseOrderServiceTest {
 
         // act
         when(productRepository.findById(newProduct.getProductId())).thenReturn(Optional.of(ProductFactory.product1()));
-        when(batchRepository.findByProductIdEqualsAndDueDateGreaterThanOrderByDueDateAscending(newProduct.getProductId(), LocalDate.now().plus(3, ChronoUnit.WEEKS)))
-                .thenReturn(List.of(BatchFactory.batchPersisted1()));
-        when(purchaseOrderRepository.findByUserIdAndStatusCodeEquals(UserFactory.user1().getId(), PurchaseOrderStatus.CART)).thenReturn(Optional.of(PurchaseOrderFactory.getPurchaseOrderCreated()));
-        when(purchaseOrderRepository.save(PurchaseOrderFactory.getPurchaseOrderCreatedAddingOneProduct())).thenReturn(PurchaseOrderFactory.getPurchaseOrderCreatedWithOneProductPersisted());
+        when(batchRepository.findByProductIdProductEqualsAndDueDateGreaterThanOrderByDueDateAsc(newProduct.getProductId(), LocalDate.now().plus(3, ChronoUnit.WEEKS)))
+                .thenReturn(BatchFactory.createListOfBatches(persistedBatch1));
+        when(purchaseOrderRepository.findByUserIdAndStatusCodeEquals(UserFactory.user1().getId(), PurchaseOrderStatus.CART))
+                .thenReturn(
+                        Optional.of(
+                                PurchaseOrderFactory.createPurchaseOrder(1, user, PurchaseOrderStatus.CART, persistedDetail1)));
+        when(purchaseOrderRepository.save(PurchaseOrderFactory.createPurchaseOrder(1, user, PurchaseOrderStatus.CART, persistedDetail1, newDetail1))).thenReturn(PurchaseOrderFactory.createPurchaseOrder(1, user, PurchaseOrderStatus.CART, persistedDetail1, persistedDetail2));
 
         var obtained = purchaseOrderService.addProductToPurchaseOrder(newProduct);
 
@@ -142,7 +166,7 @@ public class PurchaseOrderServiceTest {
 
         // act
         when(productRepository.findById(newProduct.getProductId())).thenReturn(Optional.of(ProductFactory.product1()));
-        when(batchRepository.findByProductIdEqualsAndDueDateGreaterThanOrderByDueDateAscending(newProduct.getProductId(), LocalDate.now().plus(3, ChronoUnit.WEEKS)))
+        when(batchRepository.findByProductIdProductEqualsAndDueDateGreaterThanOrderByDueDateAsc(newProduct.getProductId(), LocalDate.now().plus(3, ChronoUnit.WEEKS)))
                 .thenReturn(List.of());
 
         // assert
@@ -161,8 +185,8 @@ public class PurchaseOrderServiceTest {
 
         // act
         when(productRepository.findById(newProduct.getProductId())).thenReturn(Optional.of(ProductFactory.product1()));
-        when(batchRepository.findByProductIdEqualsAndDueDateGreaterThanOrderByDueDateAscending(newProduct.getProductId(), LocalDate.now().plus(3, ChronoUnit.WEEKS)))
-                .thenReturn(List.of(BatchFactory.batchPersisted1()));
+        when(batchRepository.findByProductIdProductEqualsAndDueDateGreaterThanOrderByDueDateAsc(newProduct.getProductId(), LocalDate.now().plus(3, ChronoUnit.WEEKS)))
+                .thenReturn(BatchFactory.createListOfBatches(persistedBatch1));
         when(purchaseOrderRepository.findByUserIdAndStatusCodeEquals(UserFactory.user1().getId(), PurchaseOrderStatus.CART)).thenReturn(Optional.empty());
 
         // assert
@@ -178,8 +202,8 @@ public class PurchaseOrderServiceTest {
         var expected = PurchaseOrderFactory.totalOfBrandNewCart();
         // act
         when(productRepository.findById(newProduct.getProductId())).thenReturn(Optional.of(ProductFactory.product1()));
-        when(purchaseOrderRepository.findByUserIdAndStatusCodeEquals(UserFactory.user1().getId(), PurchaseOrderStatus.CART)).thenReturn(Optional.of(PurchaseOrderFactory.getPurchaseOrderCreatedWithOneProductPersisted()));
-        when(purchaseOrderRepository.save(PurchaseOrderFactory.getPurchaseOrderCreated())).thenReturn(PurchaseOrderFactory.getPurchaseOrderCreated());
+        when(purchaseOrderRepository.findByUserIdAndStatusCodeEquals(UserFactory.user1().getId(), PurchaseOrderStatus.CART)).thenReturn(Optional.of(PurchaseOrderFactory.createPurchaseOrder(1, user, PurchaseOrderStatus.CART, persistedDetail1)));
+        when(purchaseOrderRepository.save(PurchaseOrderFactory.createPurchaseOrder(1, user, PurchaseOrderStatus.CART))).thenReturn(PurchaseOrderFactory.createPurchaseOrder(1, user, PurchaseOrderStatus.CART));
 
         var obtained = purchaseOrderService.deleteProductFromPurchaseOrder(newProduct);
         // assert
@@ -225,11 +249,11 @@ public class PurchaseOrderServiceTest {
         var expected = PurchaseOrderFactory.purchaseOrderExecutedDTO();
 
         // act
-        when(purchaseOrderRepository.findByUserIdAndStatusCodeEquals(UserFactory.user1().getId(), PurchaseOrderStatus.CART)).thenReturn(Optional.of(PurchaseOrderFactory.getPurchaseOrderCreatedWithOneProductPersisted()));
+        when(purchaseOrderRepository.findByUserIdAndStatusCodeEquals(UserFactory.user1().getId(), PurchaseOrderStatus.CART)).thenReturn(Optional.of(PurchaseOrderFactory.createPurchaseOrder(1, user, PurchaseOrderStatus.CART, persistedDetail1)));
         when(productRepository.findById(ProductFactory.productDTO1().getProductId())).thenReturn(Optional.of(ProductFactory.product1()));
-        when(batchRepository.findByProductIdEqualsAndDueDateGreaterThanOrderByDueDateAscending(ProductFactory.productDTO1().getProductId(), LocalDate.now().plus(3, ChronoUnit.WEEKS))).thenReturn(BatchFactory.listOfBatchesPersisted());
-        when(batchRepository.saveAll(List.of(BatchFactory.batchPersisted1With0Quantity()))).thenReturn(List.of(BatchFactory.batchPersisted1With0Quantity()));
-        when(purchaseOrderRepository.save(PurchaseOrderFactory.getNewPurchaseOrderConfirmed())).thenReturn(PurchaseOrderFactory.getNewPurchaseOrderConfirmed());
+        when(batchRepository.findByProductIdProductEqualsAndDueDateGreaterThanOrderByDueDateAsc(ProductFactory.productDTO1().getProductId(), LocalDate.now().plus(3, ChronoUnit.WEEKS))).thenReturn(BatchFactory.createListOfBatches(persistedBatch1));
+        when(batchRepository.saveAll(List.of(persistedBatchWith0CurrentCapacity))).thenReturn(List.of(persistedBatchWith0CurrentCapacity));
+        when(purchaseOrderRepository.save(PurchaseOrderFactory.createPurchaseOrder(1, user, PurchaseOrderStatus.CONFIRMED, persistedDetail1))).thenReturn(PurchaseOrderFactory.createPurchaseOrder(1, user, PurchaseOrderStatus.CONFIRMED, persistedDetail1));
         var obtained = purchaseOrderService.executePurchaseOrder();
 
         // assert
@@ -257,7 +281,7 @@ public class PurchaseOrderServiceTest {
         // arrange
 
         // act
-        when(purchaseOrderRepository.findByUserIdAndStatusCodeEquals(UserFactory.user1().getId(), PurchaseOrderStatus.CART)).thenReturn(Optional.of(PurchaseOrderFactory.getPurchaseOrderCreatedWithOneProductPersisted()));
+        when(purchaseOrderRepository.findByUserIdAndStatusCodeEquals(UserFactory.user1().getId(), PurchaseOrderStatus.CART)).thenReturn(Optional.of(PurchaseOrderFactory.createPurchaseOrder(1, user, PurchaseOrderStatus.CART, persistedDetail1)));
         when(productRepository.findById(ProductFactory.productDTO1().getProductId())).thenReturn(Optional.empty());
 
         // assert
@@ -269,9 +293,9 @@ public class PurchaseOrderServiceTest {
     void executePurchaseOrder4() {
         // arrange
         // act
-        when(purchaseOrderRepository.findByUserIdAndStatusCodeEquals(UserFactory.user1().getId(), PurchaseOrderStatus.CART)).thenReturn(Optional.of(PurchaseOrderFactory.getPurchaseOrderCreatedWithOneProductPersisted()));
+        when(purchaseOrderRepository.findByUserIdAndStatusCodeEquals(UserFactory.user1().getId(), PurchaseOrderStatus.CART)).thenReturn(Optional.of(PurchaseOrderFactory.createPurchaseOrder(1, user, PurchaseOrderStatus.CONFIRMED, persistedDetail1)));
         when(productRepository.findById(ProductFactory.productDTO1().getProductId())).thenReturn(Optional.of(ProductFactory.product1()));
-        when(batchRepository.findByProductIdEqualsAndDueDateGreaterThanOrderByDueDateAscending(ProductFactory.productDTO1().getProductId(), LocalDate.now().plus(3, ChronoUnit.WEEKS))).thenReturn(List.of());
+        when(batchRepository.findByProductIdProductEqualsAndDueDateGreaterThanOrderByDueDateAsc(ProductFactory.productDTO1().getProductId(), LocalDate.now().plus(3, ChronoUnit.WEEKS))).thenReturn(List.of());
 
         // assert
 
@@ -287,7 +311,7 @@ public class PurchaseOrderServiceTest {
         var expected = ProductFactory.getAllProductsInOrder();
         // act
         when(purchaseOrderRepository.findByUserIdAndStatusCodeEquals(UserFactory.user1().getId(), PurchaseOrderStatus.CART))
-                .thenReturn(Optional.ofNullable(PurchaseOrderFactory.getPurchaseOrderCreatedWithOneProductPersisted()));
+                .thenReturn(Optional.ofNullable(PurchaseOrderFactory.createPurchaseOrder(1, user, PurchaseOrderStatus.CART, persistedDetail1)));
         var obtained = purchaseOrderService.getAllProductsInPurchaseOrder();
         // assert
 
@@ -313,7 +337,7 @@ public class PurchaseOrderServiceTest {
         // arrange
         // act
         when(purchaseOrderRepository.findByUserIdAndStatusCodeEquals(UserFactory.user1().getId(), PurchaseOrderStatus.CART))
-                .thenReturn(Optional.ofNullable(PurchaseOrderFactory.getPurchaseOrderCreated()));
+                .thenReturn(Optional.ofNullable(PurchaseOrderFactory.createPurchaseOrder(1, user, PurchaseOrderStatus.CART)));
 
         // assert
 

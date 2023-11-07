@@ -49,7 +49,7 @@ public class ProductFactory {
         return List.of(product1(), product2());
     }
 
-    public static ProductReponseDTO productReponseDTO(){
+    public static ProductReponseDTO productReponseDTO1(){
         return ProductReponseDTO.builder()
                 .idProduct(1)
                 .name("Tomatoes")
@@ -71,7 +71,7 @@ public class ProductFactory {
 
     public static ProductListResponseDTO getAllProductsDTO(){
         return ProductListResponseDTO.builder()
-                .products(List.of(productReponseDTO(), productReponseDTO2()))
+                .products(List.of(productReponseDTO1(), productReponseDTO2()))
                 .build();
     }
 

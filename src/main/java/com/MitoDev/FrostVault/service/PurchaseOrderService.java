@@ -7,10 +7,6 @@ import com.MitoDev.FrostVault.model.entity.enums.PurchaseOrderStatus;
 import com.MitoDev.FrostVault.repository.*;
 import com.MitoDev.FrostVault.service.interfaces.IPurchaseOrderService;
 import com.MitoDev.FrostVault.util.UserUtils;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.transaction.Transactional;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -76,7 +72,7 @@ public class PurchaseOrderService implements IPurchaseOrderService {
                 .orElseThrow(() -> {
                     throw new EntityDoesNotExistException(Product.class, product.getProductId());
                 });
-        var batchesAvailable = batchRepository.findByProductIdEqualsAndDueDateGreaterThanOrderByDueDateAscending(product.getProductId(), LocalDate.now().plus(3, ChronoUnit.WEEKS));
+        var batchesAvailable = batchRepository.findByProductIdProductEqualsAndDueDateGreaterThanOrderByDueDateAsc(product.getProductId(), LocalDate.now().plus(3, ChronoUnit.WEEKS));
         if (batchesAvailable.stream().mapToInt(Batch::getCurrentQuantity).sum() < product.getQuantity())
             throw new NotEnoughProductQuantityException(prodPersisted.getIdProduct());
 
@@ -161,7 +157,7 @@ public class PurchaseOrderService implements IPurchaseOrderService {
                     .orElseThrow(() -> {
                         throw new EntityDoesNotExistException(Product.class, p.getProduct().getIdProduct());
                     });
-            var batchesAvailable = batchRepository.findByProductIdEqualsAndDueDateGreaterThanOrderByDueDateAscending(p.getProduct().getIdProduct(), LocalDate.now().plus(3, ChronoUnit.WEEKS));
+            var batchesAvailable = batchRepository.findByProductIdProductEqualsAndDueDateGreaterThanOrderByDueDateAsc(p.getProduct().getIdProduct(), LocalDate.now().plus(3, ChronoUnit.WEEKS));
             if (batchesAvailable.stream().mapToInt(Batch::getCurrentQuantity).sum() < p.getQuantity())
                 throw new NotEnoughProductQuantityException(prodPersisted.getIdProduct());
 
@@ -175,6 +171,7 @@ public class PurchaseOrderService implements IPurchaseOrderService {
                     batch.setCurrentQuantity(batch.getCurrentQuantity() - quantityRemaining);
                 batchesResultant.add(batch);
             }
+
 
             batchRepository.saveAll(batchesResultant);
         }
