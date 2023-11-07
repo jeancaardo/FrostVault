@@ -6,14 +6,19 @@ import com.MitoDev.FrostVault.model.dto.*;
 import com.MitoDev.FrostVault.model.entity.Batch;
 import com.MitoDev.FrostVault.model.entity.Product;
 import com.MitoDev.FrostVault.model.entity.Section;
+import com.MitoDev.FrostVault.model.entity.enums.Type;
 import com.MitoDev.FrostVault.repository.IBatchRepository;
 import com.MitoDev.FrostVault.repository.IProductRepository;
 import com.MitoDev.FrostVault.service.interfaces.IBatchService;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -60,17 +65,32 @@ public class BatchService implements IBatchService {
         return createBatchStockResponse(productId, batchesPerSection);
     }
 
+    @Override
+    public BatchStockNearExpirationDTO getAllBatchesCloseToExpire(Integer days, String category, String order) {
+
+        List<BatchNearExpirationDTO> list;
+
+        LocalDate dueDate = LocalDate.now().plus(days, ChronoUnit.DAYS);
+
+        Sort sort = Objects.equals(order, "desc") ? Sort.by("dueDate").descending() : Sort.by("dueDate").ascending();
+
+        if(category.equals(""))
+            list = batchRepository.getBatchesNearExpirationByOrder(dueDate, sort);
+        else
+            list = batchRepository.getBatchesNearExpirationByCategoryAndOrder(dueDate, Type.getTypeFromRawString(category), sort);
+
+        return BatchStockNearExpirationDTO.builder()
+                .batchStock(list)
+                .build();
+    }
+
     private Comparator<Batch> getBatchComparator(char order) {
-        switch (order) {
-            case 'L':
-                return Comparator.comparing(Batch::getBatchNumber);
-            case 'C':
-                return Comparator.comparing(Batch::getCurrentQuantity);
-            case 'F':
-                return Comparator.comparing(Batch::getDueDate);
-            default:
-                throw new RuntimeException("Orden no válida");
-        }
+        return switch (order) {
+            case 'L' -> Comparator.comparing(Batch::getBatchNumber);
+            case 'C' -> Comparator.comparing(Batch::getCurrentQuantity);
+            case 'F' -> Comparator.comparing(Batch::getDueDate);
+            default -> throw new RuntimeException("Orden no válida");
+        };
     }
 
     private Map<Section, List<Batch>> groupBatchesBySection(List<Batch> batches, Comparator<Batch> comparator) {

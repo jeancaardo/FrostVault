@@ -1,7 +1,9 @@
 package com.MitoDev.FrostVault.controller;
 
+import com.MitoDev.FrostVault.model.dto.BatchStockNearExpirationDTO;
 import com.MitoDev.FrostVault.model.dto.BatchStockResponseDTO;
 import com.MitoDev.FrostVault.service.interfaces.IBatchService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,5 +22,12 @@ public class BatchController {
                  batchService.getBatchesByProduct(idProduct)
                 :
                 batchService.getBatchesByProductOrdered(idProduct, order);
+    }
+
+    @GetMapping("/batch/list/due-date/{cantDays}")
+    public ResponseEntity<BatchStockNearExpirationDTO> getAllBatchesNearToExpire(@PathVariable Integer cantDays,
+                                                                                 @RequestParam(required = false) String category,
+                                                                                 @RequestParam(required = false) String order){
+        return ResponseEntity.ok(batchService.getAllBatchesCloseToExpire(cantDays, category, order));
     }
 }

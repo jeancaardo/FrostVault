@@ -5,13 +5,11 @@ import com.MitoDev.FrostVault.dataFactories.ProductFactory;
 import com.MitoDev.FrostVault.dataFactories.SectionFactory;
 import com.MitoDev.FrostVault.exception.custom.EntityDoesNotExistException;
 import com.MitoDev.FrostVault.exception.custom.NoProductsException;
-import com.MitoDev.FrostVault.model.dto.BatchBySectionDTO;
-import com.MitoDev.FrostVault.model.dto.BatchStockResponseDTO;
-import com.MitoDev.FrostVault.model.dto.BatchSummaryDTO;
-import com.MitoDev.FrostVault.model.dto.SectionDTO;
+import com.MitoDev.FrostVault.model.dto.*;
 import com.MitoDev.FrostVault.model.entity.Batch;
 import com.MitoDev.FrostVault.model.entity.Product;
 import com.MitoDev.FrostVault.model.entity.Section;
+import com.MitoDev.FrostVault.model.entity.enums.Type;
 import com.MitoDev.FrostVault.repository.IBatchRepository;
 import com.MitoDev.FrostVault.repository.IProductRepository;
 import org.junit.jupiter.api.Assertions;
@@ -21,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Sort;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -57,7 +56,13 @@ public class BatchServiceTest {
 
     private final BatchStockResponseDTO batchStockResponseDTO = BatchFactory.createBatchStockResponseDTO(1, batchBySectionDTO1);
 
+    private final BatchNearExpirationDTO batchNearExpirationDTO = BatchFactory.createBatchNearExpirationDTO(1, 50, 1, Type.FROZEN);
 
+    private final BatchNearExpirationDTO batchNearExpirationDTOCooled = BatchFactory.createBatchNearExpirationDTO(2, 50, 2, Type.COOLED);
+    private final BatchStockNearExpirationDTO batchStockNearExpirationDTO = BatchFactory.createBatchStockNearExpirationDTO(batchNearExpirationDTO, batchNearExpirationDTOCooled);
+    private final BatchStockNearExpirationDTO batchStockNearExpirationDTODescending = BatchFactory.createBatchStockNearExpirationDTO(batchNearExpirationDTOCooled, batchNearExpirationDTO);
+
+    private final BatchStockNearExpirationDTO batchStockNearExpirationDTOFilteredByType = BatchFactory.createBatchStockNearExpirationDTO(batchNearExpirationDTOCooled);
     @Test
     void getBatchesByProduct() {
         // arrange
@@ -146,6 +151,60 @@ public class BatchServiceTest {
                 .thenReturn(BatchFactory.createListOfBatches(persistedBatch1, persistedBatch2));
 
         var obtained = batchService.getBatchesByProductOrdered(productId, order);
+        // assert
+
+        Assertions.assertEquals(expected, obtained);
+    }
+
+    @Test
+    void getAllBatchesCloseToExpire() {
+
+        // arrange
+        Integer days = 120;
+        String category = "";
+        String order = "";
+        var expected = batchStockNearExpirationDTO;
+
+        // act
+
+        when(batchRepository.getBatchesNearExpirationByOrder(LocalDate.now().plus(days, ChronoUnit.DAYS), Sort.by("dueDate").ascending())).thenReturn(List.of(batchNearExpirationDTO, batchNearExpirationDTOCooled));
+        var obtained = batchService.getAllBatchesCloseToExpire(days, category, order);
+        // assert
+
+        Assertions.assertEquals(expected, obtained);
+    }
+
+    @Test
+    void getAllBatchesCloseToExpireFilteredByType() {
+
+        // arrange
+        Integer days = 120;
+        String category = "RF";
+        String order = "";
+        var expected = batchStockNearExpirationDTOFilteredByType;
+
+        // act
+
+        when(batchRepository.getBatchesNearExpirationByCategoryAndOrder(LocalDate.now().plus(days, ChronoUnit.DAYS), Type.COOLED, Sort.by("dueDate").ascending())).thenReturn(List.of(batchNearExpirationDTOCooled));
+        var obtained = batchService.getAllBatchesCloseToExpire(days, category, order);
+        // assert
+
+        Assertions.assertEquals(expected, obtained);
+    }
+
+    @Test
+    void getAllBatchesCloseToExpireOrderDescending() {
+
+        // arrange
+        Integer days = 120;
+        String category = "";
+        String order = "desc";
+        var expected = batchStockNearExpirationDTODescending;
+
+        // act
+
+        when(batchRepository.getBatchesNearExpirationByOrder(LocalDate.now().plus(days, ChronoUnit.DAYS), Sort.by("dueDate").descending())).thenReturn(List.of(batchNearExpirationDTOCooled, batchNearExpirationDTO));
+        var obtained = batchService.getAllBatchesCloseToExpire(days, category, order);
         // assert
 
         Assertions.assertEquals(expected, obtained);

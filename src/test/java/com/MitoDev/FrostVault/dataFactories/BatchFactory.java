@@ -4,6 +4,7 @@ import com.MitoDev.FrostVault.model.dto.*;
 import com.MitoDev.FrostVault.model.entity.Batch;
 import com.MitoDev.FrostVault.model.entity.Product;
 import com.MitoDev.FrostVault.model.entity.Section;
+import com.MitoDev.FrostVault.model.entity.enums.Type;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -117,14 +118,6 @@ public class BatchFactory {
                 .build();
     }
 
-    public static BatchSummaryDTO createBatchSummaryDTO(Integer batchNumber) {
-        return BatchSummaryDTO.builder()
-                .batchNumber(batchNumber)
-                .currentQuantity(50)
-                .dueDate(LocalDate.now().plus(1, ChronoUnit.MONTHS))
-                .build();
-    }
-
     public static BatchSummaryDTO createBatchSummaryDTOWithCustomQuantityAndDueDate(Integer batchNumber, Integer quantity, LocalDate dueDate) {
         return BatchSummaryDTO.builder()
                 .batchNumber(batchNumber)
@@ -135,5 +128,34 @@ public class BatchFactory {
 
     public static BatchStockDTO createBatchStockDTOWithBatches(BatchDTO batchDTOs) {
         return new BatchStockDTO(Arrays.asList(batchDTOs));
+    }
+
+    public static ProductCountByWarehouseDTO createProductCountByWarehouseDTO(Integer warehouseId, Integer count){
+        return ProductCountByWarehouseDTO
+                .builder()
+                .productCount(warehouseId)
+                .warehouseId(count)
+                .build();
+    }
+
+    public static ProductCountsDTO createProductCountsDTO(ProductCountByWarehouseDTO... pcbwdto){
+        return ProductCountsDTO.builder()
+                .productCountByWarehouse(Arrays.asList(pcbwdto))
+                .build();
+    }
+
+    public static BatchNearExpirationDTO createBatchNearExpirationDTO(Integer batchNumber, Integer currentQuantity, Integer productId, Type productType){
+        return BatchNearExpirationDTO.builder()
+                .batchNumber(batchNumber)
+                .currentQuantity(currentQuantity)
+                .productId(productId)
+                .productTypeId(productType)
+                .build();
+    }
+
+    public static BatchStockNearExpirationDTO createBatchStockNearExpirationDTO(BatchNearExpirationDTO... batches){
+        return BatchStockNearExpirationDTO.builder()
+                .batchStock(Arrays.asList(batches))
+                .build();
     }
 }
