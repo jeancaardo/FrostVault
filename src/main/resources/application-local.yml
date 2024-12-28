@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/frostvault
+    username: root
+    password: 1234
+  jpa:
+    hibernate.ddl-auto: create-drop
+    show-sql: true
+    defer-datasource-initialization: true
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:sql/products.sql, classpath:sql/warehouses.sql, classpath:sql/sections.sql, classpath:sql/users.sql
